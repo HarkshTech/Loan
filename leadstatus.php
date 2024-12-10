@@ -208,13 +208,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                 }
             }
             echo '<a class="btn btn-primary update-button" href="update_form.php?id=' . $row["ID"] . '">Update Profile</a>';
-
-             // Add the reject button here
-            echo '<form method="POST" action="reject" style="display:inline;">';
-            echo '<input type="hidden" name="lead_id" value="' . $row["ID"] . '">';
-            echo '<input type="hidden" name="action" value="reject">';
-            echo '<button type="submit" class="btn btn-danger update-button">Reject Loan</button>';
-            echo '</form>';
+            if ($row["StepReached"] != 'Disbursed') {
+                // Add the reject button here
+                echo '<form method="POST" action="reject" style="display:inline;">';
+                echo '<input type="hidden" name="lead_id" value="' . $row["ID"] . '">';
+                echo '<input type="hidden" name="action" value="reject">';
+                echo '<button type="submit" class="btn btn-danger update-button">Reject Loan</button>';
+                echo '</form>';
+            }
             
             // Check verification status and conditionally display approval buttons
             $sql_verifications = "
@@ -286,12 +287,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                 }
 
                 // Display the "Approve Loan" and "Disburse Loan" buttons based on verification status
-                if ($verification_status) {
-                    echo '<form method="POST" action="approve" style="display:inline;">';
-                    echo '<input type="hidden" name="lead_id" value="' . $row["ID"] . '">';
-                    echo '<input type="hidden" name="action" value="approve">';
-                    echo '<button type="button" class="btn btn-info" onclick="proceedApproval(' . $row["ID"] . ')">Approve Loan</button>';
-                    echo '</form>';
+                if ($verification_status && $row["StepReached"]!='Disbursed') {
+                    echo '<button type="button" class="btn btn-primary" onclick="proceedApproval(' . $row['ID'] . ')">Proceed for Approval</button>';
+
                     $leadId = $verification_row['ID'];
                     $loanAmount = $verification_row['LoanAmount'];
                     $loanPurpose = $verification_row['LoanPurpose'];
@@ -321,7 +319,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 </div>
 
 <!-- Bootstrap JS and dependencies -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 

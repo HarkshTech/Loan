@@ -130,13 +130,16 @@ if ($result->num_rows > 0) {
         }
         
         echo '<a class="btn btn-primary update-button" href="update_form.php?id=' . $row["ID"] . '">Update Profile</a>';
-        
-        // Reject Loan button
-        echo '<form method="POST" action="reject" style="display:inline-block;">';
-        echo '<input type="hidden" name="lead_id" value="' . $row["ID"] . '">';
-        echo '<input type="hidden" name="action" value="reject">';
-        echo '<button type="submit" class="btn btn-danger">Reject Loan</button>';
-        echo '</form>';
+
+
+        if ($row["StepReached"] != 'Disbursed') {
+            // Reject Loan button
+            echo '<form method="POST" action="reject" style="display:inline-block;">';
+            echo '<input type="hidden" name="lead_id" value="' . $row["ID"] . '">';
+            echo '<input type="hidden" name="action" value="reject">';
+            echo '<button type="submit" class="btn btn-danger">Reject Loan</button>';
+            echo '</form>';
+        }
 
         // Check verification status and conditionally display approval buttons
         $sql_verifications = "
@@ -208,12 +211,8 @@ if ($result->num_rows > 0) {
             }
 
             // Display the "Approve Loan" and "Disburse Loan" buttons based on verification status
-            if ($verification_status) {
-                echo '<form method="POST" action="approve">';
-                echo '<input type="hidden" name="lead_id" value="' . $row["ID"] . '">';
-                echo '<input type="hidden" name="action" value="approve">';
-                echo '<button type="button" class="btn btn-info" onclick="proceedApproval(' . $row["ID"] . ')">Approve Loan</button>';
-                    echo '</form>';
+            if ($verification_status && $row["StepReached"]!='Disbursed' ) {
+                echo '<button type="button" class="btn btn-primary" onclick="proceedApproval(' . $row['ID'] . ')">Proceed for Approval</button>';
                     $leadId = $verification_row['ID'];
                     $loanAmount = $verification_row['LoanAmount'];
                     $loanPurpose = $verification_row['LoanPurpose'];
