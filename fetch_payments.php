@@ -13,11 +13,11 @@ $query = "
     FROM emi_payments ep
     JOIN personalinformation pi ON ep.LeadID = pi.ID
     JOIN emi_schedule es ON ep.LeadID = es.LeadID
-    WHERE (ep.LeadID LIKE ? OR pi.FullName LIKE ?)
+    WHERE (ep.LeadID = ? OR pi.FullName LIKE ?)
     AND ep.bmapproval = '1' AND ep.superapproval='1'
 ";
 
-$params = ["%$search%", "%$search%"];
+$params = [$search, "%$search%"];
 $types = "ss";
 
 if ($start_date) {
@@ -31,6 +31,9 @@ if ($end_date) {
     $params[] = $end_date;
     $types .= "s";
 }
+
+$query .= " ORDER BY ep.LeadID ASC";
+
 
 $stmt = $conn->prepare($query);
 $stmt->bind_param($types, ...$params);
