@@ -374,10 +374,12 @@ $conn->query("SET time_zone = '+05:30'");
                 </thead>
                 <tbody>
                     <?php
-                    $sql = "SELECT e.ID, e.LeadID, e.sanctionedAmount, e.EMIAmount,e.PartialPayment,e.PenaltyAmount, p.FullName, e.NextPaymentDate
-                            FROM emi_schedule e
-                            JOIN personalinformation p ON e.LeadID = p.ID
-                            WHERE e.PaidEMIs < e.TotalEMIs";
+                    $sql = "SELECT e.ID, e.LeadID, e.sanctionedAmount, e.EMIAmount, e.PartialPayment, e.PenaltyAmount, p.FullName, e.NextPaymentDate
+FROM emi_schedule e
+JOIN personalinformation p ON e.LeadID = p.ID
+WHERE e.PaidEMIs < e.TotalEMIs
+ORDER BY e.LeadID;
+";
                     $result = mysqli_query($conn, $sql);
 
                     if (mysqli_num_rows($result) > 0) {

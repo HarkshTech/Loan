@@ -3,14 +3,19 @@ include 'config.php';
 
 $searchQuery = isset($_POST['searchQuery']) ? $_POST['searchQuery'] : '';
 
-$sql = "SELECT e.ID, e.LeadID, e.sanctionedAmount, e.EMIAmount,e.PartialPayment,e.PenaltyAmount, p.FullName, e.NextPaymentDate
+$sql = "SELECT e.ID, e.LeadID, e.sanctionedAmount, e.EMIAmount, e.PartialPayment, e.PenaltyAmount, 
+               p.FullName, e.NextPaymentDate
         FROM emi_schedule e
         JOIN personalinformation p ON e.LeadID = p.ID
-        WHERE e.PaidEMIs < e.TotalEMIs";
+        WHERE e.PaidEMIs < e.TotalEMIs"; // Base query
 
+// Add additional conditions if $searchQuery is set
 if (!empty($searchQuery)) {
-    $sql .= " AND (p.FullName LIKE '%$searchQuery%' OR e.LeadID LIKE '%$searchQuery%')";
+    $sql .= " AND (p.FullName LIKE '%$searchQuery%' OR e.LeadID = '$searchQuery')";
 }
+
+// Ensure results are always ordered by LeadID in ascending order
+$sql .= " ORDER BY e.LeadID ASC";
 
 $result = mysqli_query($conn, $sql);
 
