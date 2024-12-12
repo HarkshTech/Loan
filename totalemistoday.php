@@ -91,6 +91,7 @@ $assignedto = $_SESSION['username'];
                     <th>Payment Date</th>
                     <th>EMI Amount</th>
                     <th>Payment Type</th>
+                    <th>Payment Mode</th>
                     <th>Payment Receiver</th>
                     <th>Receiver Details</th>
                     <th>Approval Status</th>
@@ -122,6 +123,7 @@ $assignedto = $_SESSION['username'];
                             <td><?php echo $row['PaymentDate']; ?></td>
                             <td><?php echo $row['EMIAmount']; ?></td>
                             <td><?php echo $row['PaymentType']; ?></td>
+                            <td><?php echo $row['PaymentMode']; ?></td>
                             <td><?php echo $row['PaymentReceiver']; ?></td>
                             <td><?php echo $row['ReceiverDetails']; ?></td>
                             <td><?php echo $approval_status; ?></td>

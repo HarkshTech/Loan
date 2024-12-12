@@ -94,6 +94,7 @@ switch($role){
                                     <td>${payment.LeadID}</td>
                                     <td>${payment.FullName}</td>
                                     <td>${payment.PaymentDate}</td>
+                                    <td>${payment.PaymentMode}</td>
                                     <td>${payment.EMIAmount}</td>
                                     <td>${payment.PaidEMIs}</td>
                                     <td>${payment.PendingEMIs}</td>
@@ -154,6 +155,7 @@ switch($role){
                         <th>Lead ID</th>
                         <th>Name</th>
                         <th>Payment Date</th>
+                        <th>Payment Mode</th>
                         <th>Amount</th>
                         <th>Paid EMIs</th>
                         <th>Pending EMIs</th>

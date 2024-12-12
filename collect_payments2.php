@@ -85,6 +85,7 @@ $conn->query("SET time_zone = '+05:30'");
         $paymentReceiver = $_POST['paymentReceiver'];
         $receiverDetails = $_POST['receiverDetails'];
         $paymentD=$_POST['paymentDate'];
+        $paymentMode=$_POST['paymentModeHidden'];
         
         $paymentAmount = isset($_POST['paymentAmount']) ? $_POST['paymentAmount'] : 0;
         $penaltyAmount = isset($_POST['penaltyAmount']) ? $_POST['penaltyAmount'] : 0;
@@ -112,8 +113,8 @@ $conn->query("SET time_zone = '+05:30'");
                         $status = 'Paid';
                         
                         // Insert the payment record
-                        $insertSql = "INSERT INTO emi_payments (LeadID, PaymentDate, EMIAmount, PaymentType, OverdueDays, Status, PaymentReceiver, ReceiverDetails, bmapproval, superapproval, collector) 
-                                      VALUES ('$leadId', '$paymentD', '$emiAmount', '$paymentType', '$overdueDays', '$status', '$paymentReceiver', '$receiverDetails', '0', '0', '$user')";
+                        $insertSql = "INSERT INTO emi_payments (LeadID, PaymentDate, EMIAmount, PaymentType,PaymentMode, OverdueDays, Status, PaymentReceiver, ReceiverDetails, bmapproval, superapproval, collector) 
+                                      VALUES ('$leadId', '$paymentD', '$emiAmount', '$paymentType','$paymentMode', '$overdueDays', '$status', '$paymentReceiver', '$receiverDetails', '0', '0', '$user')";
                         if ($conn->query($insertSql) === TRUE) {
                             // Calculate the next payment date as the same day of the next month
                             $calcnextPaymentDate = date('Y-m-d', strtotime('+1 month', strtotime($nextPaymentDate)));
@@ -203,8 +204,8 @@ $conn->query("SET time_zone = '+05:30'");
                             $status = 'Paid';
                     
                             // Insert only the amount that led to the full EMI payment and include EMI number in the payment type
-                            $insertSql = "INSERT INTO emi_payments (LeadID, PaymentDate, EMIAmount, PaymentType, OverdueDays, Status, PaymentReceiver, ReceiverDetails, bmapproval, superapproval, collector) 
-                                          VALUES ('$leadId', NOW(), '$amountUsedForEMI', '$emiMessage', 0, '$status', '$paymentReceiver', '$receiverDetails', '0', '0', '$user')";
+                            $insertSql = "INSERT INTO emi_payments (LeadID, PaymentDate, EMIAmount, PaymentType, PaymentMode, OverdueDays, Status, PaymentReceiver, ReceiverDetails, bmapproval, superapproval, collector) 
+                                          VALUES ('$leadId', NOW(), '$amountUsedForEMI', '$emiMessage','$paymentMode', 0, '$status', '$paymentReceiver', '$receiverDetails', '0', '0', '$user')";
                     
                             if ($conn->query($insertSql) === TRUE) {
                                 // Continue with updating NextPaymentDate and other fields
@@ -261,54 +262,54 @@ $conn->query("SET time_zone = '+05:30'");
 
 
             case 'advance_emi':
-        if ($paymentType === 'advance_emi') {
-            $status = 'Paid';
-            $numOfEmis = intval($_POST['advanceEMICount']);
-            $fetchSql = "SELECT * FROM emi_schedule WHERE LeadID = $leadId";
-            $fetchResult = mysqli_query($conn, $fetchSql);
-            $row = mysqli_fetch_assoc($fetchResult);
-            $emiAmount = intval($row['EMIAmount']);
-            $paidEMIs = $row['PaidEMIs'];
-            $totalEMIs = $row['TotalEMIs']; // Assuming this is the total number of EMIs to be paid
-            $partialPayment = $row['PartialPayment'];
-            $oldNextPaymentDate = $row['NextPaymentDate'];
-            
-            $newPaidEMIs = $paidEMIs + $numOfEmis;
-            
-            // Calculate the new NextPaymentDate based on the old NextPaymentDate and number of EMIs paid in advance
-            $nextPaymentDate = new DateTime($oldNextPaymentDate);
-            $nextPaymentDate->modify("+$numOfEmis months");
-            
-            $updateSql = "UPDATE emi_schedule SET PaidEMIs = $newPaidEMIs, NextPaymentDate = '".$nextPaymentDate->format('Y-m-d')."', LastPaymentDate = NOW() WHERE LeadID = $leadId";
-            if ($conn->query($updateSql) === TRUE) {
-                // Check if PaidEMIs is equal to TotalEMIs and update LoanStatus if true
-                if ($newPaidEMIs >= $totalEMIs) {
-                    $updateLoanStatusSql = "UPDATE personalinformation SET LoanStatus = 'Closed' WHERE ID = $leadId";
-                    if ($conn->query($updateLoanStatusSql) === TRUE) {
-                        echo "<div class='alert alert-success'>Loan status updated to Closed.</div>";
+                if ($paymentType === 'advance_emi') {
+                    $status = 'Paid';
+                    $numOfEmis = intval($_POST['advanceEMICount']);
+                    $fetchSql = "SELECT * FROM emi_schedule WHERE LeadID = $leadId";
+                    $fetchResult = mysqli_query($conn, $fetchSql);
+                    $row = mysqli_fetch_assoc($fetchResult);
+                    $emiAmount = intval($row['EMIAmount']);
+                    $paidEMIs = $row['PaidEMIs'];
+                    $totalEMIs = $row['TotalEMIs']; // Assuming this is the total number of EMIs to be paid
+                    $partialPayment = $row['PartialPayment'];
+                    $oldNextPaymentDate = $row['NextPaymentDate'];
+                    
+                    $newPaidEMIs = $paidEMIs + $numOfEmis;
+                    
+                    // Calculate the new NextPaymentDate based on the old NextPaymentDate and number of EMIs paid in advance
+                    $nextPaymentDate = new DateTime($oldNextPaymentDate);
+                    $nextPaymentDate->modify("+$numOfEmis months");
+                    
+                    $updateSql = "UPDATE emi_schedule SET PaidEMIs = $newPaidEMIs, NextPaymentDate = '".$nextPaymentDate->format('Y-m-d')."', LastPaymentDate = NOW() WHERE LeadID = $leadId";
+                    if ($conn->query($updateSql) === TRUE) {
+                        // Check if PaidEMIs is equal to TotalEMIs and update LoanStatus if true
+                        if ($newPaidEMIs >= $totalEMIs) {
+                            $updateLoanStatusSql = "UPDATE personalinformation SET LoanStatus = 'Closed' WHERE ID = $leadId";
+                            if ($conn->query($updateLoanStatusSql) === TRUE) {
+                                echo "<div class='alert alert-success'>Loan status updated to Closed.</div>";
+                            } else {
+                                echo "<div class='alert alert-danger'>Error updating loan status: " . $conn->error . "</div>";
+                            }
+                        }
+                        
+                        $success = true;
+                        for ($i = 0; $i < $numOfEmis; $i++) {
+                            $insertSql = "INSERT INTO emi_payments (LeadID, PaymentDate, EMIAmount, PaymentType, PaymentMode, OverdueDays, Status, PaymentReceiver, ReceiverDetails, bmapproval, superapproval, collector) 
+                                        VALUES ('$leadId', NOW(), $emiAmount, '$paymentType','$paymentMode', '0', '$status', '$paymentReceiver', '$receiverDetails', '0', '0', '$user')";
+                            if ($conn->query($insertSql) !== TRUE) {
+                                $success = false;
+                                echo "<div class='alert alert-danger'>Error inserting advance payment record for EMI " . ($i + 1) . ": " . $conn->error . "</div>";
+                                break;
+                            }
+                        }
+                        if ($success) {
+                            echo "<div class='alert alert-success'>Advance payment for $numOfEmis EMIs collected successfully.</div>";
+                        }
                     } else {
-                        echo "<div class='alert alert-danger'>Error updating loan status: " . $conn->error . "</div>";
+                        echo "<div class='alert alert-danger'>Error updating advance payment: " . $conn->error . "</div>";
                     }
                 }
-                
-                $success = true;
-                for ($i = 0; $i < $numOfEmis; $i++) {
-                    $insertSql = "INSERT INTO emi_payments (LeadID, PaymentDate, EMIAmount, PaymentType, OverdueDays, Status, PaymentReceiver, ReceiverDetails, bmapproval, superapproval, collector) 
-                                  VALUES ('$leadId', NOW(), $emiAmount, '$paymentType', '0', '$status', '$paymentReceiver', '$receiverDetails', '0', '0', '$user')";
-                    if ($conn->query($insertSql) !== TRUE) {
-                        $success = false;
-                        echo "<div class='alert alert-danger'>Error inserting advance payment record for EMI " . ($i + 1) . ": " . $conn->error . "</div>";
-                        break;
-                    }
-                }
-                if ($success) {
-                    echo "<div class='alert alert-success'>Advance payment for $numOfEmis EMIs collected successfully.</div>";
-                }
-            } else {
-                echo "<div class='alert alert-danger'>Error updating advance payment: " . $conn->error . "</div>";
-            }
-        }
-        break;
+                break;
 
 
 
@@ -323,7 +324,7 @@ $conn->query("SET time_zone = '+05:30'");
                 $penaltysql="UPDATE emi_schedule SET PenaltyAmount= $newpenalty WHERE LeadID=$leadId";
                 $conn->query($penaltysql);
                 
-                $updatepayments="INSERT INTO emi_payments (LeadID,PaymentDate,EMIAmount,PaymentType,Status,PaymentReceiver,ReceiverDetails,bmapproval,superapproval,remarks) VALUES('$leadId',NOW(),'$penaltyAmount','$penaltyAmount','$paymentType','$status','$paymentReceiver','$receiverDetails','0','0','$penaltyRemarks')";
+                $updatepayments="INSERT INTO emi_payments (LeadID,PaymentDate,EMIAmount,PaymentType,PaymentMode,Status,PaymentReceiver,ReceiverDetails,bmapproval,superapproval,remarks) VALUES('$leadId',NOW(),'$penaltyAmount','$penaltyAmount','$paymentType','$PaymentMode','$status','$paymentReceiver','$receiverDetails','0','0','$penaltyRemarks')";
                 $conn->query($updatepayments);
                 break;
 
@@ -452,6 +453,16 @@ ORDER BY e.LeadID;
                                 <option value="penalty">Penalty</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="paymentMode">Payment Mode</label>
+                            <select class="form-control" id="paymentMode" name="paymentMode" required>
+                                <option value="">Select</option>
+                                <option value="POS">POS</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Online/QR">Online/QR</option>
+                                <option value="Cheque">Cheque</option>
+                            </select>
+                        </div>
                         <input type="hidden" name="leadId" id="actionLeadId">
                         <button type="submit" class="btn btn-primary">Next</button>
                     </form>
@@ -479,6 +490,7 @@ ORDER BY e.LeadID;
                         <input type="hidden" name="paymentType" id="paymentType">
                         <input type="hidden" name="paymentReceiver" id="paymentReceiverHidden">
                         <input type="hidden" name="receiverDetails" id="receiverDetailsHidden">
+                        <input type="hidden" name="paymentModeHidden" id="paymentModeHidden">
                         
                         <label for="paymentDate">Payment Date:</label>
                         <input type="date" id="paymentDate" name="paymentDate" value="<?php echo date('Y-m-d'); ?>" required>
@@ -574,48 +586,58 @@ $(document).ready(function() {
     });
 
     $('#actionForm').on('submit', function(event) {
-        event.preventDefault();
-        var actionType = $('#actionType').val();
-        var leadId = $('#actionLeadId').val();
-        var paymentReceiver = $('#paymentReceiver').val();
-        var receiverDetails = '';
+    event.preventDefault();
+    var actionType = $('#actionType').val();
+    var leadId = $('#actionLeadId').val();
+    var paymentReceiver = $('#paymentReceiver').val();
+    var paymentMode = $('#paymentMode').val(); // Get the value of the new Payment Mode field
+    var receiverDetails = '';
 
-        if (paymentReceiver === 'Agent') {
-            receiverDetails = 'Name: ' + $('#agentName').val() + ', Branch: ' + $('#agentBranch').val();
-        } else if (paymentReceiver === 'Branch') {
-            receiverDetails = 'Branch: ' + $('#branchName').val();
-        }
+    if (paymentReceiver === 'Agent') {
+        receiverDetails = 'Name: ' + $('#agentName').val() + ', Branch: ' + $('#agentBranch').val();
+    } else if (paymentReceiver === 'Branch') {
+        receiverDetails = 'Branch: ' + $('#branchName').val();
+    }
 
-        $('#paymentLeadId').val(leadId);
-        $('#paymentType').val(actionType);
-        $('#paymentReceiverHidden').val(paymentReceiver);
-        $('#receiverDetailsHidden').val(receiverDetails);
+    $('#paymentLeadId').val(leadId);
+    $('#paymentType').val(actionType);
+    $('#paymentReceiverHidden').val(paymentReceiver);
+    $('#receiverDetailsHidden').val(receiverDetails);
 
-        if (actionType === 'partial_payment') {
-            $('#partialPaymentAmountDiv').show();
-            $('#advanceEMICountDiv').hide();
-            $('#penaltyAmountDiv').hide();
-        } else if (actionType === 'advance_emi') {
-            $('#partialPaymentAmountDiv').hide();
-            $('#advanceEMICountDiv').show();
-            $('#penaltyAmountDiv').hide();
-        } else if (actionType === 'penalty') {
-            $('#partialPaymentAmountDiv').hide();
-            $('#advanceEMICountDiv').hide();
-            $('#penaltyAmountDiv').show();
-            $('#penaltyRemarks').show();
-        } else {
-            $('#partialPaymentAmountDiv').hide();
-            $('#advanceEMICountDiv').hide();
-            $('#penaltyAmountDiv').hide();
-        }
+    // Validate Payment Mode
+    if (!paymentMode) {
+        alert('Please select a Payment Mode.');
+        return; // Stop the form submission
+    }
+    $('#paymentModeHidden').val(paymentMode); // Store Payment Mode value in a hidden field
 
-        $('#actionModal').modal('hide');
+    // Handle action types
+    if (actionType === 'partial_payment') {
+        $('#partialPaymentAmountDiv').show();
+        $('#advanceEMICountDiv').hide();
+        $('#penaltyAmountDiv').hide();
+    } else if (actionType === 'advance_emi') {
+        $('#partialPaymentAmountDiv').hide();
+        $('#advanceEMICountDiv').show();
+        $('#penaltyAmountDiv').hide();
+    } else if (actionType === 'penalty') {
+        $('#partialPaymentAmountDiv').hide();
+        $('#advanceEMICountDiv').hide();
+        $('#penaltyAmountDiv').show();
+        $('#penaltyRemarks').show();
+    } else {
+        $('#partialPaymentAmountDiv').hide();
+        $('#advanceEMICountDiv').hide();
+        $('#penaltyAmountDiv').hide();
+    }
 
-        setTimeout(function() {
-            $('#dynamicModal').modal('show');
-        }, 500); // Add a delay to ensure the first modal is fully hidden
-    });
+    // Hide the first modal and show the second after a delay
+    $('#actionModal').modal('hide');
+    setTimeout(function() {
+        $('#dynamicModal').modal('show');
+    }, 500); // Add a delay to ensure the first modal is fully hidden
+});
+
 
     $('#paymentForm').on('submit', function(event) {
         event.preventDefault();

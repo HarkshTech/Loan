@@ -402,7 +402,8 @@ $result = $stmt->get_result();
                         <th>LeadID</th>
                         <th>Payment Date</th>
                         <th>EMI Amount</th>
-                        <th>PaymentType</th>
+                        <th>Payment Type</th>
+                        <th>Payment Mode</th>
                         <th>Overdue Days</th>
                         <th>Status</th>
                         <th>Receiver</th>
@@ -422,6 +423,7 @@ $result = $stmt->get_result();
                         <td><?= $row['PaymentDate'] ?></td>
                         <td><?= $row['EMIAmount'] ?></td>
                         <td><?= $row['PaymentType'] ?></td>
+                        <td><?= $row['PaymentMode'] ?></td>
                         <td><?= $row['OverdueDays'] ?></td>
                         <td><?= $row['Status'] ?></td>
                         <td><?= $row['PaymentReceiver'] ?></td>

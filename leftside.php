@@ -293,6 +293,13 @@ $username = getLoggedInUserName();
                                 <span data-key="t-chat">Approve Payments</span>
                             </a>
                         </li>
+
+                        <li>
+                            <a href="payments.php">
+                                <i data-feather="users"></i>
+                                <span data-key="t-chat">View Payments</span>
+                            </a>
+                        </li>
                         
                         <li>
                             <a href="failed_emi.php">
@@ -305,6 +312,19 @@ $username = getLoggedInUserName();
                             <a href="dashboardrecovery.php">
                                 <i data-feather="users"></i>
                                 <span data-key="t-chat">Recovery</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="recovery_assigning.php">
+                                <i data-feather="users"></i>
+                                <span data-key="t-contacts">Recovery Assigning</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="recoveryanalysis.php">
+                                <i data-feather="users"></i>
+                                <span data-key="t-contacts">Assigned Recoveries</span>
                             </a>
                         </li>
                         

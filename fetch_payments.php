@@ -9,7 +9,7 @@ $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
 $query = "
-    SELECT ep.PaymentID, ep.LeadID, ep.PaymentDate, ep.EMIAmount, pi.FullName, es.PaidEMIs, es.TotalEMIs 
+    SELECT ep.PaymentID, ep.LeadID, ep.PaymentDate,ep.PaymentMode, ep.EMIAmount, pi.FullName, es.PaidEMIs, es.TotalEMIs 
     FROM emi_payments ep
     JOIN personalinformation pi ON ep.LeadID = pi.ID
     JOIN emi_schedule es ON ep.LeadID = es.LeadID
