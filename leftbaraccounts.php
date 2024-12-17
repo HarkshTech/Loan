@@ -138,6 +138,255 @@ $username = getLoggedInUserName();
                        
                     </div>
 
+                    <?php
+                $adminname = $_SESSION['username'];
+                $role = $_SESSION['role'];
+                // Database connection
+                include('config.php');
+
+                // Fetch the unread notifications count
+                $query = "SELECT COUNT(*) AS unread_count FROM notifications WHERE status = 'unread' AND (nfor='$adminname' OR nfor='$role')";
+                $result = mysqli_query($conn, $query);
+
+                // Fetch the count value
+                $unreadCount = 0; // Default count is 0 in case of no result
+                if ($result && $row = mysqli_fetch_assoc($result)) {
+                    $unreadCount = $row['unread_count'];
+                }
+
+                ?>
+
+                <div class="notifications">
+                    <button id="openNotifications"><img src="assets/images/notifications.svg" alt="" width="24px"></button>
+                    <p><?php echo $unreadCount; ?></p>
+                </div>
+
+                <?php
+                $adminname = $_SESSION['username'];
+                $role = $_SESSION['role'];
+                // Database connection
+                include('config.php');
+
+                // Fetch unread notifications for the logged-in admin or their role
+                $query = "SELECT * FROM notifications WHERE status = 'unread' AND (nfor='$adminname' OR nfor='$role')";
+                $result = mysqli_query($conn, $query);
+
+                // Begin the modal HTML
+                echo '<div class="notifications-modal" id="notifications-modal">';
+
+                // Check if there are results
+                if (mysqli_num_rows($result) > 0) {
+                    // Loop through notifications and populate the modal dynamically
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo '<div class="notification2">';
+                        echo '    <div class="notification-details">';
+                        echo '        <p>' . htmlspecialchars($row['title']) . '</p>';
+                        echo '        <p>' . htmlspecialchars($row['message']) . '</p>';
+                        echo '    </div>';
+                        echo '    <div class="sender">';
+                        echo '        <p class="' . htmlspecialchars($row['status']) . '" onclick="markAsReadAndHide(' . $row['id'] . ')">&#10004;</p>';
+                        echo '        <p><span>Notification By:</span> ' . htmlspecialchars($row['nby']) . '</p>';
+                        echo '    </div>';
+                        echo '</div>';
+                    }
+                } else {
+                    // Display a message if no unread notifications are found
+                    echo '<p class="no-notifications">No new notifications</p>';
+                }
+
+                // Close the modal HTML
+                echo '</div>';
+                ?>
+                <style>
+                    .sender>p[class="unread"]{
+                        color: red;
+                        cursor: pointer;
+                    }
+                    p{
+                        margin: 0;padding: 0;
+                    }
+                    .notifications{
+                        position: absolute;
+                        cursor: pointer;
+                        right: 100px;
+                        border-radius: 50px;
+                        padding: 10px 5px;
+                    }
+                    .notifications:hover{
+                        background-color: #d3d3d347;
+                    }
+                    .notifications>button{
+                        border: none;
+                        background-color: transparent;
+                    }
+                    .notifications>p{
+                        position: absolute;
+                        right: 3px;
+                        top: 6px;
+                        color: white;
+                        padding: 0px 5px;
+                        background-color: red;
+                        border-radius: 50px;
+                        margin: 0 !important;
+                    }
+                    .notifications-modal{
+                        display: none;
+                        position: absolute;
+                        /* display: flex; */
+                        flex-direction: column;
+                        gap: 10px;
+                        background-color: lightgray;
+                        border-radius: 5px;
+                        padding: 10px;
+                        right: 16px;
+                        top: 88px;
+                        max-height: 40vh;
+                        width: 30%;
+                        box-shadow: 2px 2px 10px 5px #00000040;
+                        animation: myAnim 2s ease 0s 1 normal forwards;
+                        overflow: auto;
+                        box-sizing: border-box;
+                    }
+                    @keyframes myAnim {
+                        0% {
+                            animation-timing-function: ease-in;
+                            opacity: 1;
+                            transform: translateY(-45px);
+                        }
+
+                        24% {
+                            opacity: 1;
+                        }
+
+                        40% {
+                            animation-timing-function: ease-in;
+                            transform: translateY(-24px);
+                        }
+
+                        65% {
+                            animation-timing-function: ease-in;
+                            transform: translateY(-12px);
+                        }
+
+                        82% {
+                            animation-timing-function: ease-in;
+                            transform: translateY(-6px);
+                        }
+
+                        93% {
+                            animation-timing-function: ease-in;
+                            transform: translateY(-4px);
+                        }
+
+                        25%,
+                        55%,
+                        75%,
+                        87% {
+                            animation-timing-function: ease-out;
+                            transform: translateY(0px);
+                        }
+
+                        100% {
+                            animation-timing-function: ease-out;
+                            opacity: 1;
+                            transform: translateY(0px);
+                        }
+                    }
+                    .notifications-modal::-webkit-scrollbar{
+                        width: 12px; /* Width of vertical scrollbar */
+                        height: 12px; /* Height of horizontal scrollbar */
+                    }
+
+                    /* Scrollbar thumb */
+                    .notifications-modal::-webkit-scrollbar-thumb {
+                        background: darkgray; /* Color of the scrollbar thumb */
+                        border-radius: 6px;   /* Rounded corners for the thumb */
+                    }
+
+                    /* Scrollbar thumb on hover */
+                    .notifications-modal::-webkit-scrollbar-thumb:hover {
+                        background: gray; /* Color of the thumb when hovered */
+                    }
+
+                    /* Scrollbar track */
+                    .notifications-modal::-webkit-scrollbar-track {
+                        background: lightgray; /* Background of the scrollbar track */
+                        border-radius: 6px;
+                    }
+                    .notification2{
+                        display: flex;
+                        gap: 20px;
+                        background-color: white;
+                        padding: 4px 20px;
+                        border-radius: 5px;
+
+                    }
+                    .notification-details p:first-child{
+                        font-weight: 700;
+                    }
+                    .notification-details p:nth-child(2){
+                        font-weight: 500;
+                    }
+                    .notification-details p:nth-child(2){
+                        font-weight: 500;
+                    }
+                    .sender span{
+                        font-weight: 600;
+                    }
+                </style>
+
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                    // Get modal, toggle button, and close button
+                    const modal = document.getElementById("notifications-modal");
+                    const toggleModalBtn = document.getElementById("openNotifications");
+                    const closeModalBtn = document.getElementById("closeModalBtn");
+
+                    // Toggle modal on button click
+                    toggleModalBtn.addEventListener("click", () => {
+                    if (modal.style.display === "flex") {
+                        modal.style.display = "none"; // Close the modal
+                    } else {
+                        modal.style.display = "flex"; // Open the modal
+                    }
+                    });
+
+                    // Close modal when close button is clicked
+                    closeModalBtn.addEventListener("click", () => {
+                    modal.style.display = "none";
+                    });
+
+                    // Close modal when clicking outside modal content
+                    window.addEventListener("click", (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = "none";
+                    }
+                    });
+
+                        function markAsReadAndHide(id) {
+                        // AJAX call to update the status in the database
+                        $.ajax({
+                            url: 'update_notification.php',
+                            method: 'POST',
+                            data: {
+                                id: id
+                            },
+                            success: function(response) {
+                                if (response === 'success') {
+                                    // Reload the page upon successful response
+                                    location.reload();
+                                } else {
+                                    console.log('Error updating notification status');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.log('AJAX Error:', error);
+                            }
+                        });
+                    }
+
+                </script>
+
                     <div class="d-flex">
 
                         <div class="dropdown d-inline-block d-lg-none ms-2">
@@ -162,18 +411,17 @@ $username = getLoggedInUserName();
 
                       
                         <div class="dropdown d-none d-sm-inline-block">
-                        <!--<button type="button" class="btn header-item" id="mode-setting-btn">-->
-                        <!--    <i data-feather="moon" class="icon-lg layout-mode-dark"></i>-->
-                        <!--    <i data-feather="sun" class="icon-lg layout-mode-light"></i>-->
-                        <!--</button>-->
-                        <div id="navbar-username" style="display: none;"><?php echo htmlspecialchars($username); ?></div>
-                        <div class="profile-badge" id="profileBadge"></div>
-                        <div id="profileDisplay">
-                            <p id="fullUsername"></p>
-                            <form method="post" action="logout.php">
-                                <button type="submit">Logout</button>
-                            </form>
-                        </div>
+                            <div id="navbar-username" style="display: none;"><?php
+                            $username=$_SESSION['username']; 
+                            echo htmlspecialchars($username); 
+                            ?></div>
+                            <div class="profile-badge" id="profileBadge"></div>
+                            <div id="profileDisplay">
+                                <p id="fullUsername"></p>
+                                <form method="post" action="logout.php">
+                                    <button type="submit">Logout</button>
+                                </form>
+                            </div>
 
                     </div>
 
