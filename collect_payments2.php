@@ -457,10 +457,10 @@ ORDER BY e.LeadID;
                             <label for="paymentMode">Payment Mode</label>
                             <select class="form-control" id="paymentMode" name="paymentMode" required>
                                 <option value="">Select</option>
-                                <option value="POS">POS</option>
+                                <option value="Bank Account">Bank Account</option>
                                 <option value="Cash">Cash</option>
-                                <option value="Online/QR">Online/QR</option>
-                                <option value="Cheque">Cheque</option>
+                                <option value="Gpay">Gpay</option>
+                                <option value="HDFC">HDFC</option>
                             </select>
                         </div>
                         <input type="hidden" name="leadId" id="actionLeadId">

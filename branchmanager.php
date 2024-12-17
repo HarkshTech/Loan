@@ -205,31 +205,6 @@ WHERE
                         </div>
                     </div>
                 </div>
-                <div class="notifications-container">
-                    <!-- PHP script to fetch dynamic notifications -->
-                    <?php
-                    // Include your database connection file
-                    include 'config.php';
-
-                    // Fetch unread notifications from the database
-                    $query = "SELECT * FROM notifications WHERE status = 'unread' AND (nfor='$bmname' OR nfor='$role')";
-                    $result = mysqli_query($conn, $query);
-
-                    if (mysqli_num_rows($result) > 0) {
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            $statusClass = $row['status'] === 'read' ? 'read' : '';
-                            echo "<div class='notification $statusClass' id='notification_{$row['id']}'>
-                                <h3>{$row['title']}</h3>
-                                <div class='details'>
-                                    <p>{$row['message']}</p>
-                                    <p><strong>Notification By:</strong> {$row['nby']}</p>
-                                    <span class='mark-read' onclick='markAsReadAndHide({$row['id']})'>&#10004;</span>
-                                </div>
-                            </div>";
-                        }
-                    }
-                    ?>
-                </div>
                 <!-- end page title -->
                 <div class="row">
                     <!--Total Sales team members-->
