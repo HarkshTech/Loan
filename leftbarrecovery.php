@@ -146,13 +146,13 @@ $username = getLoggedInUserName();
                 include('config.php');
 
                 // Fetch the unread notifications count
-                $query = "SELECT COUNT(*) AS unread_count FROM notifications WHERE status = 'unread' AND (nfor='$adminname' OR nfor='$role')";
-                $result = mysqli_query($conn, $query);
+                $queryn = "SELECT COUNT(*) AS unread_count FROM notifications WHERE status = 'unread' AND (nfor='$adminname' OR nfor='$role')";
+                $resultn = mysqli_query($conn, $queryn);
 
                 // Fetch the count value
                 $unreadCount = 0; // Default count is 0 in case of no result
-                if ($result && $row = mysqli_fetch_assoc($result)) {
-                    $unreadCount = $row['unread_count'];
+                if ($resultn && $rown = mysqli_fetch_assoc($resultn)) {
+                    $unreadCount = $rown['unread_count'];
                 }
 
                 ?>
@@ -166,27 +166,27 @@ $username = getLoggedInUserName();
                 $adminname = $_SESSION['username'];
                 $role = $_SESSION['role'];
                 // Database connection
-                include('config.php');
+                // include('config.php');
 
                 // Fetch unread notifications for the logged-in admin or their role
-                $query = "SELECT * FROM notifications WHERE status = 'unread' AND (nfor='$adminname' OR nfor='$role')";
-                $result = mysqli_query($conn, $query);
+                $queryno = "SELECT * FROM notifications WHERE status = 'unread' AND (nfor='$adminname' OR nfor='$role')";
+                $resultno = mysqli_query($conn, $queryno);
 
                 // Begin the modal HTML
                 echo '<div class="notifications-modal" id="notifications-modal">';
 
                 // Check if there are results
-                if (mysqli_num_rows($result) > 0) {
+                if (mysqli_num_rows($resultno) > 0) {
                     // Loop through notifications and populate the modal dynamically
-                    while ($row = mysqli_fetch_assoc($result)) {
+                    while ($rowno = mysqli_fetch_assoc($resultno)) {
                         echo '<div class="notification2">';
                         echo '    <div class="notification-details">';
-                        echo '        <p>' . htmlspecialchars($row['title']) . '</p>';
-                        echo '        <p>' . htmlspecialchars($row['message']) . '</p>';
+                        echo '        <p>' . htmlspecialchars($rowno['title']) . '</p>';
+                        echo '        <p>' . htmlspecialchars($rowno['message']) . '</p>';
                         echo '    </div>';
                         echo '    <div class="sender">';
-                        echo '        <p class="' . htmlspecialchars($row['status']) . '" onclick="markAsReadAndHide(' . $row['id'] . ')">&#10004;</p>';
-                        echo '        <p><span>Notification By:</span> ' . htmlspecialchars($row['nby']) . '</p>';
+                        echo '        <p class="' . htmlspecialchars($rowno['status']) . '" onclick="markAsReadAndHide(' . $rowno['id'] . ')">&#10004;</p>';
+                        echo '        <p><span>Notification By:</span> ' . htmlspecialchars($rowno['nby']) . '</p>';
                         echo '    </div>';
                         echo '</div>';
                     }
@@ -389,35 +389,7 @@ $username = getLoggedInUserName();
                 </script>
 
                 <div class="d-flex">
-
-                    <div class="dropdown d-inline-block d-lg-none ms-2">
-                        <button type="button" class="btn header-item" id="page-header-search-dropdown"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="search" class="icon-lg"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
-                            aria-labelledby="page-header-search-dropdown">
-
-                            <form class="p-3">
-                                <div class="form-group m-0">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Search ..."
-                                            aria-label="Search Result">
-
-                                        <button class="btn btn-primary" type="submit"><i
-                                                class="mdi mdi-magnify"></i></button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-
                     <div class="dropdown d-none d-sm-inline-block">
-                        <!--<button type="button" class="btn header-item" id="mode-setting-btn">-->
-                        <!--    <i data-feather="moon" class="icon-lg layout-mode-dark"></i>-->
-                        <!--    <i data-feather="sun" class="icon-lg layout-mode-light"></i>-->
-                        <!--</button>-->
                         <div id="navbar-username" style="display: none;"><?php
                         $username=$_SESSION['username']; 
                         echo htmlspecialchars($username); 
@@ -429,6 +401,9 @@ $username = getLoggedInUserName();
                                 <button type="submit">Logout</button>
                             </form>
                         </div>
+
+                    </div>
+                </div>
 
 
 
